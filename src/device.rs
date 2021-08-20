@@ -375,13 +375,6 @@ impl Device {
 /// let device = device::get_device_from_guid(&String::from("test_switch"));
 /// //...
 /// ```
-///
-/// This example covers getting a SQLSprinkler device
-/// ```
-/// use aa_models::device;
-///
-/// let sprinkler = device::get_device_from_guid(&String::from("bf176c86-f96b-4412-bd97-3f09fa5a7ce8-5"));
-/// ```
 /// # Params
 /// * `guid`  The GUID of the device we want to get.
 /// # Return
