@@ -41,7 +41,7 @@ impl ::std::default::Default for TvState {
 /// # Return
 /// True if the device is a TV, false otherwise.
 pub fn parse_device(mut dev: Device) -> Device {
-    if dev.kind == crate::models::device::DeviceType::TV {
+    if dev.kind == crate::device::DeviceType::TV {
         let is_online = dev.is_online();
         // !!! ONLY QUERY TV WHEN IT IS ON !!!
         if is_online {

@@ -106,7 +106,7 @@ fn on_off_attribute() -> Value {
 /// # Return
 /// The attributes needed for TV's
 fn tv_attribute() -> Value {
-    let _tv = crate::models::tv::get_tv_state();
+    let _tv = crate::tv::get_tv_state();
     serde_json::json!({
         "commandOnlyOnOff": false,
         "queryOnlyOnOff": false,
