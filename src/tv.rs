@@ -1,8 +1,7 @@
 use std::process::Command;
 
 use serde::{Deserialize, Serialize};
-
-use crate::models::device::Device;
+use crate::device::Device;
 
 /// A struct representing the command output for getting the tv volume
 #[derive(Serialize, Deserialize, Debug)]

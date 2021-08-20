@@ -5,7 +5,7 @@ use isahc::Request;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
-use crate::models::device::{Device, DeviceType, get_device_from_guid};
+use crate::device::{Device, DeviceType, get_device_from_guid};
 
 /// A struct representing the data from SQLSprinkler zones.
 #[derive(Deserialize)]
