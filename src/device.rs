@@ -62,29 +62,6 @@ pub enum DeviceType {
     TV,
 }
 
-/// Gets all the traits that belong to a TV.
-fn tv_traits() -> Vec<&'static str> {
-    vec![
-        "action.devices.traits.OnOff",
-        "action.devices.traits.Volume",
-    ]
-}
-
-/// Gets all the traits that belong to opening/closing doors
-fn open_close_traits() -> Vec<&'static str> {
-    vec!["action.devices.traits.OpenClose"]
-}
-
-/// Gets all traits that belong to turning things on/off
-fn on_off_traits() -> Vec<&'static str> {
-    vec!["action.devices.traits.OnOff"]
-}
-
-/// Gets all traits that belong to things that can be rebooted
-fn reboot_traits() -> Vec<&'static str> {
-    vec!["action.devices.traits.Reboot"]
-}
-
 /// Gets attributes for garage doors
 /// # Return
 /// The attributes needed for garage doors.
@@ -283,12 +260,19 @@ impl Device {
     /// # Return
     /// A list of traits that this device has.
     pub fn get_google_device_traits(&self) -> Vec<&str> {
+        let mut traits = vec![];
         match self.kind {
-            DeviceType::GARAGE => open_close_traits(),
-            DeviceType::ROUTER => reboot_traits(),
-            DeviceType::TV => tv_traits(),
-            _ => on_off_traits(),
+            DeviceType::GARAGE => { traits: Vec<&str> = DeviceTrait::open_close() }
+            DeviceType::ROUTER => { traits: Vec<&str> = DeviceTrait::reboot() }
+            DeviceType::TV => {
+                let mut _traits: Vec<&str> = DeviceTrait::on_off();
+                let mut _new_traits = DeviceTrait::volume();
+                traits.append(&mut _new_traits);
+                traits = _traits
+            }
+            _ => { traits: Vec<&str> = DeviceTrait::on_off() }
         }
+        return traits;
     }
 
     /// Gets the hardware type for google home
@@ -579,6 +563,8 @@ impl GoogleDevice for Device {
     }
 }
 
+impl DeviceTrait for Device {}
+
 impl FromStr for HardwareType {
     type Err = ();
     fn from_str(s: &str) -> Result<HardwareType, ()> {
@@ -610,4 +596,28 @@ impl FromStr for DeviceType {
 
 pub trait GoogleDevice {
     fn google_smarthome_json(&self) -> Value;
+}
+
+/// A group of traits that relate to individual devices. Each method here returns a vec to be compliance with how
+/// Google Home handles the traits.
+pub trait DeviceTrait {
+    /// Gets all the traits that belong to a TV.
+    fn volume() -> Vec<&'static str> {
+        vec![
+            "action.devices.traits.Volume",
+        ]
+    }
+
+    /// Gets all the traits that belong to opening/closing doors
+    fn open_close() -> Vec<&'static str> { vec!["action.devices.traits.OpenClose"] }
+
+    /// Gets all traits that belong to turning things on/off
+    fn on_off() -> Vec<&'static str> {
+        vec!["action.devices.traits.OnOff"]
+    }
+
+    /// Gets all traits that belong to things that can be rebooted
+    fn reboot() -> Vec<&'static str> {
+        vec!["action.devices.traits.Reboot"]
+    }
 }
