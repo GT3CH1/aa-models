@@ -261,18 +261,24 @@ impl Device {
     /// A list of traits that this device has.
     pub fn get_google_device_traits(&self) -> Vec<&str> {
         let mut traits = vec![];
-        match self.kind {
-            DeviceType::GARAGE => { traits: Vec<&str> = DeviceTrait::open_close() }
-            DeviceType::ROUTER => { traits: Vec<&str> = DeviceTrait::reboot() }
-            DeviceType::TV => {
-                let mut _traits: Vec<&str> = DeviceTrait::on_off();
-                let mut _new_traits = DeviceTrait::volume();
-                traits.append(&mut _new_traits);
-                traits = _traits
+        return match self.kind {
+            DeviceType::GARAGE => {
+                let traits: Vec<&str> = Device::open_close();
+                traits
             }
-            _ => { traits: Vec<&str> = DeviceTrait::on_off() }
-        }
-        return traits;
+            DeviceType::ROUTER => {
+                Device::reboot()
+            }
+            DeviceType::TV => {
+                let mut _traits: Vec<&str> = Device::on_off();
+                let mut _new_traits: Vec<&str> = Device::volume();
+                traits.append(&mut _new_traits);
+                traits
+            }
+            _ => {
+                Device::on_off()
+            }
+        };
     }
 
     /// Gets the hardware type for google home
@@ -603,9 +609,9 @@ pub trait GoogleDevice {
 pub trait DeviceTrait {
     /// Gets all the traits that belong to a TV.
     fn volume() -> Vec<&'static str> {
-        vec![
-            "action.devices.traits.Volume",
-        ]
+        let mut arr = vec![];
+        arr.push("action.devices.traits.Volume");
+        arr
     }
 
     /// Gets all the traits that belong to opening/closing doors
