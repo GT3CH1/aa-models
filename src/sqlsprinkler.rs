@@ -39,7 +39,7 @@ pub fn set_zone(ip: String, state: bool, id: i64) -> bool {
 
     let zone_toggle = ZoneToggle { id, state };
 
-    let send_res = match Request::put(url)
+    let send_res = match Request::put(&url)
         .header("content-type", "application/json")
         .body(serde_json::to_vec(&zone_toggle).unwrap())
         .unwrap()
