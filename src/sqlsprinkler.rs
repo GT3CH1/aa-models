@@ -45,7 +45,7 @@ pub fn set_zone(ip: String, state: bool, id: i64) -> bool {
         .unwrap()
         .send()
     {
-        Ok(res) => res.status.is_success(),
+        Ok(res) => res.status().is_success(),
         Err(e) => {
             println!("Error: {} with URL {}", e, url);
             false
