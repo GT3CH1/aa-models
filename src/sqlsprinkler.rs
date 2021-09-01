@@ -37,22 +37,21 @@ struct SystemToggle {
 pub fn set_zone(ip: String, state: bool, id: i64) -> bool {
     let url = format!("http://{}:3030/zone", ip);
 
-    let zone_toggle = ZoneToggle {
-        id,
-        state,
-    };
+    let zone_toggle = ZoneToggle { id, state };
 
     let send_res = match Request::put(url)
         .header("content-type", "application/json")
-        .body(serde_json::to_vec(&zone_toggle).unwrap()).unwrap()
-        .send() {
-        Ok(res) => res,
+        .body(serde_json::to_vec(&zone_toggle).unwrap())
+        .unwrap()
+        .send()
+    {
+        Ok(res) => res.status.is_success(),
         Err(e) => {
             println!("Error: {} with URL {}", e, url);
-            e
+            false
         }
     };
-    send_res.status().is_success()
+    send_res
 }
 
 /// Sets the sprinkler system on/off
@@ -60,13 +59,19 @@ pub fn set_system(ip: String, state: bool) -> bool {
     let url = format!("http://{}:3030/system/state", ip);
 
     let system_state = SystemToggle {
-        system_enabled: state
+        system_enabled: state,
     };
 
-    Request::put(url)
+    let status = match Request::put(url)
         .header("content-type", "application/json")
-        .body(serde_json::to_vec(&system_state).unwrap()).unwrap()
-        .send().unwrap().status().is_success()
+        .body(serde_json::to_vec(&system_state).unwrap())
+        .unwrap()
+        .send()
+    {
+        Ok(..) => true,
+        Err(..) => false,
+    };
+    status
 }
 
 /// Gets the status from the SQLSprinkler host
@@ -95,7 +100,6 @@ fn get_zones_from_sqlsprinkler(ip: &String) -> Result<Vec<Zone>, Box<dyn Error>>
 
     Ok(zone_list)
 }
-
 
 /// Checks to see if the given device is an SQLSprinkler Host.  If it is, push the zones that are
 /// connected to that SQLSprinkler host.
@@ -133,7 +137,9 @@ pub fn check_if_device_is_sqlsprinkler_host(dev: Device) -> Vec<Device> {
 /// # Return
 /// True if there is a match to the pattern of a SQLSprinkler zone.
 pub fn check_if_zone(guid: &String) -> bool {
-    let re = Regex::new(r"(?im)^[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[-][0-9].?$").unwrap();
+    let re =
+        Regex::new(r"(?im)^[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[-][0-9].?$")
+            .unwrap();
     re.is_match(guid.as_str())
 }
 
@@ -141,12 +147,10 @@ pub fn check_if_zone(guid: &String) -> bool {
 pub fn get_zone(guid: &String) -> Device {
     let host_guid = &guid[0..36];
     let host_device = get_device_from_guid(&host_guid.to_string());
-    let reg = Regex::new(r"(?im)^[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[-]").unwrap();
+    let reg =
+        Regex::new(r"(?im)^[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[-]").unwrap();
 
-    let id_vec: Vec<String> = reg
-        .split(&guid)
-        .map(|x| x.to_string())
-        .collect();
+    let id_vec: Vec<String> = reg.split(&guid).map(|x| x.to_string()).collect();
 
     let id = id_vec[1].parse::<i64>().unwrap() as i8;
     println!("Got SQLSprinkler host device with IP: {}", &host_device.ip);
