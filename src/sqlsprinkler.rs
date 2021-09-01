@@ -42,10 +42,17 @@ pub fn set_zone(ip: String, state: bool, id: i64) -> bool {
         state,
     };
 
-    Request::put(url)
+    let send_res = match Request::put(url)
         .header("content-type", "application/json")
         .body(serde_json::to_vec(&zone_toggle).unwrap()).unwrap()
-        .send().unwrap().status().is_success()
+        .send() {
+        Ok(res) => res,
+        Err(e) => {
+            println!("Error: {} with URL {}", e, url);
+            e
+        }
+    };
+    send_res.status().is_success()
 }
 
 /// Sets the sprinkler system on/off
