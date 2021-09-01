@@ -149,7 +149,7 @@ pub fn get_zone(guid: &String) -> Device {
         .collect();
 
     let id = id_vec[1].parse::<i64>().unwrap() as i8;
-
+    println!("Got SQLSprinkler host device with IP: {}", &host_device.ip);
     let sprinkler_list = get_zones_from_sqlsprinkler(&host_device.ip).unwrap();
     for zone in sprinkler_list {
         if zone.id == id {
