@@ -4,6 +4,7 @@ use std::str::FromStr;
 
 use aa_consts::*;
 use isahc::http::StatusCode;
+use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
