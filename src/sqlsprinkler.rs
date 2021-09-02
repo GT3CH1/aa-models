@@ -2,6 +2,7 @@ use std::error::Error;
 
 use isahc::prelude::*;
 use isahc::Request;
+use log::debug;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 
