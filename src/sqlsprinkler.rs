@@ -159,7 +159,9 @@ pub fn get_zone(guid: &String) -> Device {
     let sprinkler_list = get_zones_from_sqlsprinkler(&host_device.ip).unwrap();
     for zone in sprinkler_list {
         if zone.id == id {
-            return Device::from(zone);
+            let mut zone_device = Device::from(zone);
+            zone_device.ip = host_device.ip.clone();
+            return zone_device;
         }
     }
     Device::default()
