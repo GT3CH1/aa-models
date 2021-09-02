@@ -47,7 +47,7 @@ pub fn set_zone(ip: String, state: bool, id: i64) -> bool {
     {
         Ok(res) => res.status().is_success(),
         Err(e) => {
-            println!("Error: {} with URL {}", e, &url);
+            debug!("Error: {} with URL {}", e, &url);
             false
         }
     };
@@ -146,6 +146,7 @@ pub fn check_if_zone(guid: &String) -> bool {
 /// Gets a Zone(as a Device) from the given GUID.
 pub fn get_zone(guid: &String) -> Device {
     let host_guid = &guid[0..36];
+    debug!("Host guid: {}", host_guid);
     let host_device = get_device_from_guid(&host_guid.to_string());
     let reg =
         Regex::new(r"(?im)^[0-9A-Fa-f]{8}[-]?(?:[0-9A-Fa-f]{4}[-]?){3}[0-9A-Fa-f]{12}[-]").unwrap();
@@ -153,7 +154,7 @@ pub fn get_zone(guid: &String) -> Device {
     let id_vec: Vec<String> = reg.split(&guid).map(|x| x.to_string()).collect();
 
     let id = id_vec[1].parse::<i64>().unwrap() as i8;
-    println!("Got SQLSprinkler host device with IP: {}", &host_device.ip);
+    debug!("Got SQLSprinkler host device with IP: {}", &host_device.ip);
     let sprinkler_list = get_zones_from_sqlsprinkler(&host_device.ip).unwrap();
     for zone in sprinkler_list {
         if zone.id == id {

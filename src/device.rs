@@ -379,7 +379,7 @@ pub fn get_device_from_guid(guid: &String) -> Device {
     let mut dev = match serde_json::from_value(device_value) {
         Ok(d) => d,
         Err(e) => {
-            println!("Err: {}", e);
+            debug!("Err: {}", e);
             Device::default()
         }
     };
