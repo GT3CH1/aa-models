@@ -82,10 +82,18 @@ pub fn set_system(ip: String, state: bool) -> bool {
 /// A boolean representing the state of the SQLSprinkler host, or an error if something happened.
 pub(crate) fn get_status_from_sqlsprinkler(ip: &String) -> Result<bool, Box<dyn Error>> {
     let url = format!("http://{}:3030/system/state", ip);
-    let response = isahc::get(url).unwrap().text().unwrap();
-    let system_status: SystemToggle = serde_json::from_str(&response).unwrap();
+    let response = match isahc::get(url) {
+        Ok(mut res) => res.text().unwrap(),
+        Err(..) => "".to_string(),
+    };
 
-    Ok(system_status.system_enabled)
+    match response.as_str() {
+        "" => return Ok(false),
+        _ => {
+            let system_status: SystemToggle = serde_json::from_str(&response).unwrap();
+            Ok(system_status.system_enabled)
+        }
+    }
 }
 
 /// Gets all the zones from the SQLSprinkler host.
