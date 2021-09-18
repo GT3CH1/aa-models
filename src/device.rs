@@ -68,7 +68,8 @@ pub enum DeviceType {
 /// The attributes needed for garage doors.
 fn garage_attribute() -> Value {
     serde_json::json!({
-        "discreteOnlyOpenClose": true
+        "discreteOnlyOpenClose": true,
+        "openDirection": ["UP","DOWN"]
     })
 }
 
@@ -267,18 +268,14 @@ impl Device {
                 let traits: Vec<&str> = Device::open_close();
                 traits
             }
-            DeviceType::ROUTER => {
-                Device::reboot()
-            }
+            DeviceType::ROUTER => Device::reboot(),
             DeviceType::TV => {
                 let mut _traits: Vec<&str> = Device::on_off();
                 let mut _new_traits: Vec<&str> = Device::volume();
                 traits.append(&mut _new_traits);
                 traits
             }
-            _ => {
-                Device::on_off()
-            }
+            _ => Device::on_off(),
         };
     }
 
@@ -616,7 +613,9 @@ pub trait DeviceTrait {
     }
 
     /// Gets all the traits that belong to opening/closing doors
-    fn open_close() -> Vec<&'static str> { vec!["action.devices.traits.OpenClose"] }
+    fn open_close() -> Vec<&'static str> {
+        vec!["action.devices.traits.OpenClose"]
+    }
 
     /// Gets all traits that belong to turning things on/off
     fn on_off() -> Vec<&'static str> {
