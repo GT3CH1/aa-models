@@ -36,6 +36,10 @@ As of now, the following devices and their traits are supported
     <tr>
         <td>LG TV's</td><td>OnOff, Volume</td>
     </tr>
+    <tr>
+        <td>UPS Batteries (via nut-client)</td>
+        <td>EnergyStorage</td>
+    </tr>
 </table>
 
 For more information on what these mean, please see the
@@ -43,8 +47,6 @@ For more information on what these mean, please see the
 
 ## TODO's
 
-* [ ] Better device attribute handling (somehow make attribute values on the fly?)
-* [ ] A way to add attributes together (ie, with TV, add two vecs together)  (probably `vec.append`)
 * [ ] Better error handling
 
 ## Notice
