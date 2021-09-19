@@ -214,6 +214,7 @@ impl Device {
     /// # Return
     /// A bool representing if the update was successful.
     pub fn database_update(&self) -> bool {
+        debug!("Updating device : {:?}", self.last_state);
         get_firebase_devices()
             .at(&self.guid)
             .unwrap()
