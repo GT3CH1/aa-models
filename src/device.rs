@@ -8,8 +8,8 @@ use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
+use crate::{battery, tv};
 use crate::sqlsprinkler::*;
-use crate::tv;
 
 /// Data representing a device that can be automated/remotely controlled.
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -54,6 +54,7 @@ pub enum HardwareType {
 /// Represents all the different types of devices we can have / currently implemented
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Clone)]
 pub enum DeviceType {
+    BATTERY,
     LIGHT,
     SWITCH,
     GARAGE,
@@ -80,6 +81,13 @@ fn on_off_attribute() -> Value {
     serde_json::json!({
         "commandOnlyOnOff": false,
         "queryOnlyOnOff": false
+    })
+}
+
+fn battery_attribute() -> Value {
+    serde_json::json!({
+        "queryOnlyEnergyStorage": true,
+        "isRechargeable": true
     })
 }
 
@@ -134,6 +142,7 @@ impl Device {
             | DeviceType::ROUTER
             | DeviceType::SqlSprinklerHost => on_off_attribute(),
             DeviceType::TV => tv_attribute(),
+            DeviceType::BATTERY => battery_attribute(),
         }
     }
 
@@ -205,13 +214,16 @@ impl Device {
     /// # Return
     /// A bool representing if the update was successful.
     pub fn database_update(&self) -> bool {
-        get_firebase_devices()
+        debug!("Updating device : {}", serde_json::to_value(self).unwrap());
+        let success = get_firebase_devices()
             .at(&self.guid)
             .unwrap()
             .set(serde_json::to_value(&self).unwrap())
             .unwrap()
             .code
-            == StatusCode::OK
+            == StatusCode::OK;
+        debug!("success: {}", success);
+        success
     }
 
     /// Gets the device type for use in google home
@@ -242,6 +254,7 @@ impl Device {
             DeviceType::SPRINKLER => "action.devices.types.SPRINKLER",
             DeviceType::ROUTER => "action.devices.types.ROUTER",
             DeviceType::TV => "action.devices.types.TV",
+            DeviceType::BATTERY => "action.devices.types.SENSOR",
         }
     }
 
@@ -275,6 +288,7 @@ impl Device {
                 traits.append(&mut _new_traits);
                 traits
             }
+            DeviceType::BATTERY => Device::energy_storage(),
             _ => Device::on_off(),
         };
     }
@@ -390,6 +404,9 @@ pub fn get_device_from_guid(guid: &String) -> Device {
         }
         DeviceType::TV => {
             dev = tv::parse_device(dev.clone());
+        }
+        DeviceType::BATTERY => {
+            dev = battery::parse_device(dev.clone());
         }
         _ => {}
     }
@@ -586,6 +603,7 @@ impl FromStr for DeviceType {
     type Err = ();
     fn from_str(s: &str) -> Result<DeviceType, ()> {
         match s {
+            "BATTERY" => Ok(DeviceType::BATTERY),
             "LIGHT" => Ok(DeviceType::LIGHT),
             "SWITCH" => Ok(DeviceType::SWITCH),
             "GARAGE" => Ok(DeviceType::GARAGE),
@@ -625,5 +643,10 @@ pub trait DeviceTrait {
     /// Gets all traits that belong to things that can be rebooted
     fn reboot() -> Vec<&'static str> {
         vec!["action.devices.traits.Reboot"]
+    }
+
+    /// Gets all the traits that belong to things with energy storage
+    fn energy_storage() -> Vec<&'static str> {
+        vec!["action.devices.traits.EnergyStorage"]
     }
 }
