@@ -8,8 +8,8 @@ use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 
+use crate::{battery, tv};
 use crate::sqlsprinkler::*;
-use crate::tv;
 
 /// Data representing a device that can be automated/remotely controlled.
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -54,6 +54,7 @@ pub enum HardwareType {
 /// Represents all the different types of devices we can have / currently implemented
 #[derive(Debug, PartialEq, Eq, Serialize, Deserialize, Copy, Clone)]
 pub enum DeviceType {
+    BATTERY,
     LIGHT,
     SWITCH,
     GARAGE,
@@ -81,6 +82,13 @@ fn on_off_attribute() -> Value {
         "commandOnlyOnOff": false,
         "queryOnlyOnOff": false
     })
+}
+
+fn battery_attribute() -> Value {
+    serde_json::json!({
+        "queryOnlyEnergyStorage": true,
+        "isRechargeable": true
+    });
 }
 
 /// Gets all the attributes needed for TV's
@@ -134,6 +142,7 @@ impl Device {
             | DeviceType::ROUTER
             | DeviceType::SqlSprinklerHost => on_off_attribute(),
             DeviceType::TV => tv_attribute(),
+            DeviceType::BATTERY => battery_attribute(),
         }
     }
 
@@ -242,6 +251,7 @@ impl Device {
             DeviceType::SPRINKLER => "action.devices.types.SPRINKLER",
             DeviceType::ROUTER => "action.devices.types.ROUTER",
             DeviceType::TV => "action.devices.types.TV",
+            DeviceType::BATTERY => "action.devices.types.SENSOR",
         }
     }
 
@@ -390,6 +400,9 @@ pub fn get_device_from_guid(guid: &String) -> Device {
         }
         DeviceType::TV => {
             dev = tv::parse_device(dev.clone());
+        }
+        DeviceType::BATTERY => {
+            dev = battery::parse_device(dev.clone());
         }
         _ => {}
     }
@@ -625,5 +638,10 @@ pub trait DeviceTrait {
     /// Gets all traits that belong to things that can be rebooted
     fn reboot() -> Vec<&'static str> {
         vec!["action.devices.traits.Reboot"]
+    }
+
+    /// Gets all the traits that belong to things with energy storage
+    fn energy_storage() -> Vec<&'static str> {
+        vec!["action.devices.traits.EnergyStorage"]
     }
 }

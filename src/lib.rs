@@ -1,4 +1,4 @@
+pub mod battery;
 pub mod device;
-pub mod tv;
 pub mod sqlsprinkler;
-
+pub mod tv;
