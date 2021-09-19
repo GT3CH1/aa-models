@@ -599,7 +599,7 @@ impl FromStr for DeviceType {
     type Err = ();
     fn from_str(s: &str) -> Result<DeviceType, ()> {
         match s {
-            "BATTERY" => OK(DeviceType::BATTERY),
+            "BATTERY" => Ok(DeviceType::BATTERY),
             "LIGHT" => Ok(DeviceType::LIGHT),
             "SWITCH" => Ok(DeviceType::SWITCH),
             "GARAGE" => Ok(DeviceType::GARAGE),
