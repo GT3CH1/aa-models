@@ -214,14 +214,16 @@ impl Device {
     /// # Return
     /// A bool representing if the update was successful.
     pub fn database_update(&self) -> bool {
-        debug!("Updating device : {:?}", self.last_state);
-        get_firebase_devices()
+        debug!("Updating device : {}", serde_json::to_value(self).unwrap());
+        let success = get_firebase_devices()
             .at(&self.guid)
             .unwrap()
             .set(serde_json::to_value(&self).unwrap())
             .unwrap()
             .code
-            == StatusCode::OK
+            == StatusCode::OK;
+        debug!("success: {}", success);
+        success
     }
 
     /// Gets the device type for use in google home
@@ -286,6 +288,7 @@ impl Device {
                 traits.append(&mut _new_traits);
                 traits
             }
+            DeviceType::BATTERY => Device::energy_storage(),
             _ => Device::on_off(),
         };
     }
