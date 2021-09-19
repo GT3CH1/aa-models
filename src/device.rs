@@ -88,7 +88,7 @@ fn battery_attribute() -> Value {
     serde_json::json!({
         "queryOnlyEnergyStorage": true,
         "isRechargeable": true
-    });
+    })
 }
 
 /// Gets all the attributes needed for TV's
