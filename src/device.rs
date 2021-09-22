@@ -275,7 +275,6 @@ impl Device {
     /// # Return
     /// A list of traits that this device has.
     pub fn get_google_device_traits(&self) -> Vec<&str> {
-        let mut traits = vec![];
         return match self.kind {
             DeviceType::GARAGE => {
                 let traits: Vec<&str> = Device::open_close();
@@ -283,7 +282,7 @@ impl Device {
             }
             DeviceType::ROUTER => Device::reboot(),
             DeviceType::TV => {
-                let mut _traits: Vec<&str> = Device::on_off();
+                let mut traits: Vec<&str> = Device::on_off();
                 let mut _new_traits: Vec<&str> = Device::volume();
                 traits.append(&mut _new_traits);
                 traits
