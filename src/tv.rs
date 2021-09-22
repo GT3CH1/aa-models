@@ -1,6 +1,7 @@
 use std::process::Command;
 
 use serde::{Deserialize, Serialize};
+
 use crate::device::Device;
 
 /// A struct representing the command output for getting the tv volume
@@ -29,7 +30,7 @@ impl ::std::default::Default for TvState {
             on: false,
             muted: false,
             volume: 0,
-            volumeMax: 0,
+            volumeMax: 100,
         }
     }
 }

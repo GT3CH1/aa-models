@@ -95,11 +95,10 @@ fn battery_attribute() -> Value {
 /// # Return
 /// The attributes needed for TV's
 fn tv_attribute() -> Value {
-    let _tv = crate::tv::get_tv_state();
     serde_json::json!({
         "commandOnlyOnOff": false,
         "queryOnlyOnOff": false,
-        "volumeMaxLevel": _tv.volumeMax,
+        "volumeMaxLevel": 100,
         "volumeCanMuteAndUnmute": true,
         "commandOnlyVolume": false,
         "volumeDefaultPercentage": 10
