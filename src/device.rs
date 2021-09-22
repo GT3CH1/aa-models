@@ -95,12 +95,12 @@ fn battery_attribute() -> Value {
 /// # Return
 /// The attributes needed for TV's
 fn tv_attribute() -> Value {
-    let _tv = crate::tv::get_tv_state();
     serde_json::json!({
         "commandOnlyOnOff": false,
         "queryOnlyOnOff": false,
-        "volumeMaxLevel": _tv.volumeMax,
+        "volumeMaxLevel": 100,
         "volumeCanMuteAndUnmute": true,
+        "levelStepSize": 1,
         "commandOnlyVolume": false,
         "volumeDefaultPercentage": 10
     })
@@ -275,7 +275,6 @@ impl Device {
     /// # Return
     /// A list of traits that this device has.
     pub fn get_google_device_traits(&self) -> Vec<&str> {
-        let mut traits = vec![];
         return match self.kind {
             DeviceType::GARAGE => {
                 let traits: Vec<&str> = Device::open_close();
@@ -283,7 +282,7 @@ impl Device {
             }
             DeviceType::ROUTER => Device::reboot(),
             DeviceType::TV => {
-                let mut _traits: Vec<&str> = Device::on_off();
+                let mut traits: Vec<&str> = Device::on_off();
                 let mut _new_traits: Vec<&str> = Device::volume();
                 traits.append(&mut _new_traits);
                 traits
