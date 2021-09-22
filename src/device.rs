@@ -100,6 +100,7 @@ fn tv_attribute() -> Value {
         "queryOnlyOnOff": false,
         "volumeMaxLevel": 100,
         "volumeCanMuteAndUnmute": true,
+        "levelStepSize": 1,
         "commandOnlyVolume": false,
         "volumeDefaultPercentage": 10
     })
