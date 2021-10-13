@@ -1,4 +1,5 @@
 use isahc::ReadResponseExt;
+use log::debug;
 use serde_json::Value;
 
 use crate::device::Device;
@@ -10,6 +11,7 @@ use crate::device::Device;
 /// True if the device is a TV, false otherwise.
 pub fn parse_device(mut dev: Device) -> Device {
     if dev.kind == crate::device::DeviceType::BATTERY {
+        debug!("Battery IP: {}",dev.ip);
         let battery_status: Value = serde_json::from_str(
             isahc::get(format!("http://{}/ups_status.php", dev.ip))
                 .unwrap()
