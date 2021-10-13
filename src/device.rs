@@ -523,20 +523,24 @@ pub fn add_device(user_uuid: &String, mut device: Device) {
 /// let device_guid = String::from("test-in-testing");
 /// remove_device(&uuid,&device_guid);
 /// ```
-pub fn remove_device(user_uuid: &String, device_guid: &String) {
-    let device = get_device_from_guid(device_guid);
-    if device.guid != device_guid.clone() {
-        return;
+pub fn remove_device(user_uuid: &String, device_guid: &String) -> bool {
+    let device_from_guid = get_device_from_guid(device_guid);
+
+    if device_from_guid.guid != device_guid.clone() || device_from_guid == Device::default() {
+        return false;
     }
 
     let mut list = get_device_list(user_uuid);
-    let index = list.iter().position(|x| *x == device.guid).unwrap();
+    let index = list.iter().position(|x| *x == device_from_guid.guid).unwrap();
+    debug!("[delete] Device index is {}", index);
     list.remove(index);
     set_device_list(user_uuid, list);
     get_firebase_devices()
         .at(device_guid)
         .unwrap()
-        .remove();
+        .remove()
+        .unwrap()
+        .is_success()
 }
 
 /// Gets all the devices from firebase + any SQLSprinkler devices
