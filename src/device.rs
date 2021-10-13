@@ -418,12 +418,27 @@ pub fn get_device_from_guid(guid: &String) -> Device {
 ///```
 /// use aa_models::device;
 ///
-/// let device_list = device::get_devices_uuid(&String::from("c177d208-64e3-488f-be88-7ee7f736f666"));
+/// let device_list = device::get_devices_uuid(&String::from("eoqBGbi9AHUxtOrL3xpJZDQotGP2"));
 /// println!("{:?}",device_list);
 /// ```
 /// # Return
 /// * A `Vec<Device>` containing all of the device information.
 pub fn get_devices_uuid(user_uuid: &String) -> Vec<Device> {
+    let firebase_device_list = get_device_list(user_uuid);
+    device_list_from_firebase(serde_json::to_value(firebase_device_list).unwrap())
+}
+
+/// Gets all the GUIDs belonging to the given user uuid.
+/// # Example
+///```
+/// use aa_models::device;
+///
+/// let device_list = device::get_device_list(&String::from("eoqBGbi9AHUxtOrL3xpJZDQotGP2"));
+/// println!("{:?}",device_list);
+/// ```
+/// # Return
+/// * A `Vec<Device>` containing all of the device information.
+pub fn get_device_list(user_uuid: &String) -> Vec<String> {
     let firebase_device_list = get_firebase_users()
         .at(&user_uuid)
         .unwrap()
@@ -432,8 +447,96 @@ pub fn get_devices_uuid(user_uuid: &String) -> Vec<Device> {
         .get()
         .unwrap()
         .body;
-    let device_list = device_list_from_firebase(firebase_device_list);
-    device_list
+    let list: Vec<String> = match serde_json::from_value(firebase_device_list) {
+        Ok(r) => r,
+        Err(..) => vec![]
+    };
+    list
+}
+
+/// Sets the list of devices for the user
+/// # Params
+/// user_uuid: The user uuid we want to update
+/// device_list: The list of device GUIDs.
+/// # Example
+///```
+/// use aa_models::device;
+/// use aa_models::device::{get_device_list,set_device_list};
+/// // Create a copy of the current device list
+/// let backup_list = get_device_list(&String::from("eoqBGbi9AHUxtOrL3xpJZDQotGP2"));
+/// let mut list = get_device_list(&String::from("eoqBGbi9AHUxtOrL3xpJZDQotGP2"));
+/// list.push(String::from("8675309"));
+/// set_device_list(&String::from("eoqBGbi9AHUxtOrL3xpJZDQotGP2"),list.clone());
+/// assert_ne!(&backup_list, &list);
+/// set_device_list(&String::from("eoqBGbi9AHUxtOrL3xpJZDQotGP2"),backup_list.clone());
+/// list = get_device_list(&String::from("eoqBGbi9AHUxtOrL3xpJZDQotGP2"));
+/// assert_eq!(&backup_list,&list);
+/// ```
+pub fn set_device_list(user_uuid: &String, device_list: Vec<String>) -> bool {
+    get_firebase_users()
+        .at(&user_uuid)
+        .unwrap()
+        .at("devices")
+        .unwrap()
+        .set(serde_json::to_value(device_list).unwrap())
+        .is_ok()
+}
+
+/// Adds a device to the given users account.
+/// # Params
+/// user_uuid: The user to add the device to.
+/// device: The device we want to add.
+/// # Example
+///```
+/// use aa_models::device;
+/// use aa_models::device::{get_device_list, set_device_list, DeviceType, add_device};
+///
+/// let uuid = String::from("eoqBGbi9AHUxtOrL3xpJZDQotGP2");
+/// let mut device = device::Device::default();
+/// device.guid = String::from("test-in-testing");
+/// device.kind = DeviceType::LIGHT;
+/// device.useruuid = uuid.clone();
+/// add_device(&uuid,device);
+/// ```
+pub fn add_device(user_uuid: &String, mut device: Device) {
+    device.useruuid = user_uuid.parse().unwrap();
+    let mut list = get_device_list(user_uuid);
+    list.push(device.guid.clone());
+    set_device_list(user_uuid, list);
+    get_firebase_devices()
+        .at(&device.guid)
+        .unwrap()
+        .set(serde_json::to_value(&device).unwrap());
+}
+
+/// Removes a device from the database. The user id of the given device guid must match.
+/// If there is not a match, no action will be taken.
+/// # Params
+/// user_uuid: The user to remove the device of.
+/// device_guid: The device we want to remove.
+/// # Example
+/// ```
+/// use aa_models::device;
+/// use aa_models::device::{remove_device};
+///
+/// let uuid = String::from("eoqBGbi9AHUxtOrL3xpJZDQotGP2");
+/// let device_guid = String::from("test-in-testing");
+/// remove_device(&uuid,&device_guid);
+/// ```
+pub fn remove_device(user_uuid: &String, device_guid: &String) {
+    let device = get_device_from_guid(device_guid);
+    if device.guid != device_guid.clone() {
+        return;
+    }
+
+    let mut list = get_device_list(user_uuid);
+    let index = list.iter().position(|x| *x == device.guid).unwrap();
+    list.remove(index);
+    set_device_list(user_uuid, list);
+    get_firebase_devices()
+        .at(device_guid)
+        .unwrap()
+        .remove();
 }
 
 /// Gets all the devices from firebase + any SQLSprinkler devices
