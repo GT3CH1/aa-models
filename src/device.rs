@@ -509,7 +509,8 @@ pub fn add_device(user_uuid: &String, mut device: Device) {
     get_firebase_devices()
         .at(&device.guid)
         .unwrap()
-        .set(serde_json::to_value(&device).unwrap());
+        .set(serde_json::to_value(&device).unwrap())
+        .unwrap();
 }
 
 /// Removes a device from the database. The user id of the given device guid must match.
