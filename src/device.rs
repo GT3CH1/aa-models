@@ -570,6 +570,7 @@ fn device_list_from_firebase(body: Value) -> Vec<Device> {
                 dev = tv::parse_device(dev.clone());
                 final_list.push(dev);
             }
+
             DeviceType::SqlSprinklerHost => {
                 final_list.push(dev.clone());
                 // Only get the sprinkler system list if the device is online.
@@ -580,6 +581,7 @@ fn device_list_from_firebase(body: Value) -> Vec<Device> {
                     }
                 }
             }
+            // Push everything else.
             _ => {
                 final_list.push(dev.clone());
             }
