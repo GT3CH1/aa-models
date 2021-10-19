@@ -572,9 +572,12 @@ fn device_list_from_firebase(body: Value) -> Vec<Device> {
             }
             DeviceType::SqlSprinklerHost => {
                 final_list.push(dev.clone());
-                let sprinkler_list = check_if_device_is_sqlsprinkler_host(dev.clone());
-                for sprinkler in sprinkler_list {
-                    final_list.push(sprinkler);
+                // Only get the sprinkler system list if the device is online.
+                if dev.is_online() {
+                    let sprinkler_list = check_if_device_is_sqlsprinkler_host(dev.clone());
+                    for sprinkler in sprinkler_list {
+                        final_list.push(sprinkler);
+                    }
                 }
             }
             _ => {
