@@ -104,6 +104,8 @@ pub(crate) fn get_status_from_sqlsprinkler(ip: &String) -> Result<bool, Box<dyn 
 /// error occurs, we will get that error.
 fn get_zones_from_sqlsprinkler(ip: &String) -> Result<Vec<Zone>, Box<dyn Error>> {
     let url = format!("http://{}:3030/zone/info", ip);
+
+    //TODO: Make this less ugly.
     let response = isahc::get(url).unwrap().text().unwrap();
     let zone_list: Vec<Zone> = serde_json::from_str(&response).unwrap();
 
