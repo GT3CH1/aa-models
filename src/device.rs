@@ -401,8 +401,10 @@ pub fn get_device_from_guid(guid: &String) -> Device {
     match dev.kind {
         DeviceType::SqlSprinklerHost => {
             let ip = &dev.ip;
-            dev.last_state = Value::from(get_status_from_sqlsprinkler(ip).unwrap());
-            dev.database_update();
+            if dev.is_online() {
+                dev.last_state = Value::from(get_status_from_sqlsprinkler(ip).unwrap());
+                dev.database_update();
+            }
         }
         DeviceType::TV => {
             dev = tv::parse_device(dev.clone());
@@ -452,7 +454,7 @@ pub fn get_device_list(user_uuid: &String) -> Vec<String> {
         .body;
     let list: Vec<String> = match serde_json::from_value(firebase_device_list) {
         Ok(r) => r,
-        Err(..) => vec![]
+        Err(..) => vec![],
     };
     list
 }
@@ -535,7 +537,10 @@ pub fn remove_device(user_uuid: &String, device_guid: &String) -> bool {
     }
 
     let mut list = get_device_list(user_uuid);
-    let index = list.iter().position(|x| *x == device_from_guid.guid).unwrap();
+    let index = list
+        .iter()
+        .position(|x| *x == device_from_guid.guid)
+        .unwrap();
     debug!("[delete] Device index is {}", index);
     list.remove(index);
     set_device_list(user_uuid, list);
