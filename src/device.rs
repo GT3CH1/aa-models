@@ -586,7 +586,7 @@ fn device_list_from_firebase(body: Value) -> Vec<Device> {
                     final_list.push(dev.clone());
                 } else {
                     // Force device to show as being turned off.
-                    dev.last_state = false;
+                    dev.last_state = serde_json::Value::Bool(false);
                 }
             }
             // Push everything else.
