@@ -393,10 +393,12 @@ pub fn get_device_from_guid(guid: &String) -> Device {
             Device::default()
         }
     };
+
     if dev == Device::default() {
         debug!("Returning default device");
         return dev;
     }
+
     match dev.kind {
         DeviceType::SqlSprinklerHost => {
             let ip = &dev.ip;
@@ -405,9 +407,11 @@ pub fn get_device_from_guid(guid: &String) -> Device {
                 dev.database_update();
             }
         }
+
         DeviceType::TV => {
             dev = tv::parse_device(dev.clone());
         }
+
         DeviceType::BATTERY => {
             dev = battery::parse_device(dev.clone());
         }
