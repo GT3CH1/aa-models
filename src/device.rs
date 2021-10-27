@@ -220,8 +220,7 @@ impl Device {
             .unwrap()
             .set(serde_json::to_value(&self).unwrap())
             .unwrap()
-            .code
-            == StatusCode::OK;
+            .is_success();
         debug!("success: {}", success);
         success
     }
