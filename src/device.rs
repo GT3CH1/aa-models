@@ -331,7 +331,7 @@ impl Device {
     /// assert_eq!("Test Switch",device.get_name());
     /// ```
     pub fn get_name(&self) -> &String {
-        if &self.name == "" {
+        if &self.name.is_empty() {
             return &self.guid;
         }
         return &self.name;
