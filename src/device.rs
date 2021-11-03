@@ -3,7 +3,6 @@ use std::process::Command;
 use std::str::FromStr;
 
 use aa_consts::*;
-use isahc::http::StatusCode;
 use log::debug;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -331,7 +330,7 @@ impl Device {
     /// assert_eq!("Test Switch",device.get_name());
     /// ```
     pub fn get_name(&self) -> &String {
-        if &self.name.is_empty() {
+        if self.name.is_empty() {
             return &self.guid;
         }
         return &self.name;
