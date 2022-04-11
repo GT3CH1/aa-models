@@ -43,6 +43,7 @@ pub fn set_zone(ip: String, state: bool, id: i64) -> bool {
     let send_res = match Request::put(&url)
         .header("content-type", "application/json")
         .body(serde_json::to_vec(&zone_toggle).unwrap())
+        .timeout(std::time::Duration::from_secs(3))
         .unwrap()
         .send()
     {
@@ -66,6 +67,7 @@ pub fn set_system(ip: String, state: bool) -> bool {
     let status = match Request::put(url)
         .header("content-type", "application/json")
         .body(serde_json::to_vec(&system_state).unwrap())
+        .timeout(std::time::Duration::from_secs(3))
         .unwrap()
         .send()
     {
@@ -82,7 +84,7 @@ pub fn set_system(ip: String, state: bool) -> bool {
 /// A boolean representing the state of the SQLSprinkler host, or an error if something happened.
 pub(crate) fn get_status_from_sqlsprinkler(ip: &String) -> Result<bool, Box<dyn Error>> {
     let url = format!("http://{}:3030/system/state", ip);
-    let response = match isahc::get(url) {
+    let response = match isahc::get(url).timeout(std::time::Duration::from_secs(3)).unwrap() {
         Ok(mut res) => res.text().unwrap(),
         Err(..) => "".to_string(),
     };
@@ -106,7 +108,7 @@ fn get_zones_from_sqlsprinkler(ip: &String) -> Result<Vec<Zone>, Box<dyn Error>>
     let url = format!("http://{}:3030/zone/info", ip);
 
     //TODO: Make this less ugly.
-    let response = isahc::get(url).unwrap().text().unwrap();
+    let response = isahc::get(url).timeout(std::time::Duration::from_secs(3)).unwrap().text().unwrap();;
     let zone_list: Vec<Zone> = serde_json::from_str(&response).unwrap();
 
     Ok(zone_list)
